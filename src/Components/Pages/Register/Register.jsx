@@ -1,7 +1,46 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import registerImg from "../../../assets/Wavy_Gen-01_Single-07.jpg";
+import { AuthContext } from '../../../Providers/AuthProviders';
+import Swal from 'sweetalert2';
 const Register = () => {
+    const { createUser } = useContext(AuthContext);
+    const handleRegister = event => {
+        event.preventDefault();
+        const form = event.target;
+        const name = form.name.value;
+        const email = form.email.value;
+        const password = form.password.value;
+        const user = { name, email, password };
+        console.log(user);
+        createUser(email, password)
+            .then(res => {
+                console.log(res.user);
+                fetch("http://localhost:5000/users", {
+                    method: "POST",
+                    headers: {
+                        "content-type": "application/json"
+                    },
+                    body: JSON.stringify(user)
+                })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.insertedId) {
+                            {
+                                Swal.fire({
+                                    title: "User created successfully!",
+                                    icon: "success",
+                                    draggable: true
+                                });
+                                form.reset();
+                            }
+                        }
+                    })
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }
     return (
         <div className='bg-base-200 min-h-screen'>
             <div className='text-center pt-8'>
@@ -14,24 +53,24 @@ const Register = () => {
                         <img src={registerImg} alt="" className='w-[580px] rounded-lg' />
                     </div>
                     <div className="card bg-base-100 w-full max-w-sm shrink-0 shadow-2xl">
-                        <form className="card-body">
+                        <form onSubmit={handleRegister} className="card-body">
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">Name</span>
                                 </label>
-                                <input type="text" placeholder="name" className="input input-bordered" required />
+                                <input type="text" name="name" placeholder="name" className="input input-bordered" required />
                             </div>
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">Email</span>
                                 </label>
-                                <input type="email" placeholder="email" className="input input-bordered" required />
+                                <input type="email" name="email" placeholder="email" className="input input-bordered" required />
                             </div>
                             <div className="form-control">
                                 <label className="label">
                                     <span className="label-text">Password</span>
                                 </label>
-                                <input type="password" placeholder="password" className="input input-bordered" required />
+                                <input type="password" name="password" placeholder="password" className="input input-bordered" required />
                                 <label className="label">
                                     <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
                                 </label>
